@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { AnnictClient } from "../annict-client.ts";
+import { formatReviews } from "../formatters.ts";
 
 export function registerReviewTools(
 	server: McpServer,
@@ -35,7 +36,7 @@ export function registerReviewTools(
 				content: [
 					{
 						type: "text" as const,
-						text: JSON.stringify(result, null, 2),
+						text: formatReviews(result),
 					},
 				],
 			};

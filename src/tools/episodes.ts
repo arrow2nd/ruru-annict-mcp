@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { AnnictClient } from "../annict-client.ts";
+import { formatEpisodes } from "../formatters.ts";
 
 export function registerEpisodeTools(
 	server: McpServer,
@@ -34,7 +35,7 @@ export function registerEpisodeTools(
 				content: [
 					{
 						type: "text" as const,
-						text: JSON.stringify(result, null, 2),
+						text: formatEpisodes(result),
 					},
 				],
 			};

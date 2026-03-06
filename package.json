@@ -1,6 +1,6 @@
 {
 	"name": "ruru-annict-mcp",
-	"version": "0.1.1",
+	"version": "0.2.0",
 	"description": "MCP server for Annict — search anime, view episodes, records, and more",
 	"type": "module",
 	"bin": {

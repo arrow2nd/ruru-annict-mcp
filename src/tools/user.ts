@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { AnnictClient } from "../annict-client.ts";
+import { formatUser, formatActivities, formatPrograms, formatCasts, formatStaffs } from "../formatters.ts";
 
 export function registerUserTools(
 	server: McpServer,
@@ -19,7 +20,7 @@ export function registerUserTools(
 				content: [
 					{
 						type: "text" as const,
-						text: JSON.stringify(user, null, 2),
+						text: formatUser(user),
 					},
 				],
 			};
@@ -51,7 +52,7 @@ export function registerUserTools(
 				content: [
 					{
 						type: "text" as const,
-						text: JSON.stringify(result, null, 2),
+						text: formatActivities(result),
 					},
 				],
 			};
@@ -91,7 +92,7 @@ export function registerUserTools(
 				content: [
 					{
 						type: "text" as const,
-						text: JSON.stringify(result, null, 2),
+						text: formatPrograms(result),
 					},
 				],
 			};
@@ -126,7 +127,7 @@ export function registerUserTools(
 				content: [
 					{
 						type: "text" as const,
-						text: JSON.stringify(result, null, 2),
+						text: formatCasts(result),
 					},
 				],
 			};
@@ -161,7 +162,7 @@ export function registerUserTools(
 				content: [
 					{
 						type: "text" as const,
-						text: JSON.stringify(result, null, 2),
+						text: formatStaffs(result),
 					},
 				],
 			};

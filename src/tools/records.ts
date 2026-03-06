@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { AnnictClient } from "../annict-client.ts";
+import { formatRecords } from "../formatters.ts";
 
 export function registerRecordTools(
 	server: McpServer,
@@ -39,7 +40,7 @@ export function registerRecordTools(
 				content: [
 					{
 						type: "text" as const,
-						text: JSON.stringify(result, null, 2),
+						text: formatRecords(result),
 					},
 				],
 			};
