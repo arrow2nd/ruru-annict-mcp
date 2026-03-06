@@ -9,7 +9,7 @@ import { registerWorkTools } from "./tools/works.ts";
 export function createMcpServer(client: AnnictClient): McpServer {
 	const server = new McpServer({
 		name: "ruru-annict-mcp",
-		version: "0.1.0",
+		version: "0.1.1",
 	});
 
 	registerWorkTools(server, client);
