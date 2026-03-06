@@ -10,7 +10,7 @@ export function registerRecordTools(
 		"get_records",
 		{
 			description:
-				"エピソードへの記録（感想・評価）一覧を取得する",
+				"アニメのエピソードへの記録（感想・評価）一覧を取得する",
 			inputSchema: {
 				filter_episode_id: z
 					.number()

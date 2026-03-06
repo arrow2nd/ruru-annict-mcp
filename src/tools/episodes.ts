@@ -10,7 +10,7 @@ export function registerEpisodeTools(
 		"get_episodes",
 		{
 			description:
-				"作品のエピソード一覧を取得する。filter_work_id は必須",
+				"アニメ作品のエピソード一覧を取得する。filter_work_id は必須",
 			inputSchema: {
 				filter_work_id: z
 					.number()

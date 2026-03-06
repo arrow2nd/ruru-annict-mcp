@@ -9,7 +9,7 @@ export function registerUserTools(
 	server.registerTool(
 		"get_me",
 		{
-			description: "認証ユーザーの情報を取得する",
+			description: "Annictの認証ユーザー情報を取得する",
 			inputSchema: {},
 		},
 		async () => {
@@ -30,7 +30,7 @@ export function registerUserTools(
 		"get_following_activities",
 		{
 			description:
-				"フォロー中のユーザーのアクティビティを取得する",
+				"フォロー中のユーザーのアニメ視聴アクティビティを取得する",
 			inputSchema: {
 				filter_actions: z
 					.string()
@@ -62,7 +62,7 @@ export function registerUserTools(
 		"get_my_programs",
 		{
 			description:
-				"自分の放送予定を取得する",
+				"自分のアニメ放送予定を取得する",
 			inputSchema: {
 				filter_started: z
 					.boolean()
@@ -102,7 +102,7 @@ export function registerUserTools(
 		"get_casts",
 		{
 			description:
-				"作品のキャスト（声優）一覧を取得する。filter_work_id は必須",
+				"アニメ作品のキャスト（声優）一覧を取得する。filter_work_id は必須",
 			inputSchema: {
 				filter_work_id: z
 					.number()
@@ -137,7 +137,7 @@ export function registerUserTools(
 		"get_staffs",
 		{
 			description:
-				"作品のスタッフ一覧を取得する。filter_work_id は必須",
+				"アニメ作品のスタッフ一覧を取得する。filter_work_id は必須",
 			inputSchema: {
 				filter_work_id: z
 					.number()

@@ -10,7 +10,7 @@ export function registerWorkTools(
 		"search_works",
 		{
 			description:
-				"作品を検索する。タイトル・シーズン等で絞り込み可能",
+				"Annict（アニメ視聴管理サービス）でアニメ作品を検索する。タイトル・シーズン等で絞り込み可能",
 			inputSchema: {
 				filter_title: z
 					.string()
@@ -58,7 +58,7 @@ export function registerWorkTools(
 		"get_my_works",
 		{
 			description:
-				"自分がステータスを付けた作品の一覧を取得する",
+				"自分がステータスを付けたアニメ作品の一覧を取得する",
 			inputSchema: {
 				filter_status: z
 					.enum(["wanna_watch", "watching", "watched", "on_hold", "stop_watching"])

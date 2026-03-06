@@ -10,7 +10,7 @@ export function registerReviewTools(
 		"get_reviews",
 		{
 			description:
-				"作品のレビュー一覧を取得する",
+				"アニメ作品のレビュー一覧を取得する",
 			inputSchema: {
 				filter_work_id: z
 					.number()
