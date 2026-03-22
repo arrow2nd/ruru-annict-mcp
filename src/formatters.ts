@@ -11,121 +11,184 @@ import type {
 	Staff,
 } from "./annict-client.ts";
 
+function yamlStr(value: string): string {
+	if (value === "") {
+		return '""';
+	}
+	const escaped = value
+		.replace(/\\/g, "\\\\")
+		.replace(/"/g, '\\"')
+		.replace(/\n/g, "\\n");
+	return `"${escaped}"`;
+}
+
+function field(
+	key: string,
+	value: string | number | boolean | null | undefined,
+): string | false {
+	if (value === null || value === undefined || value === "") {
+		return false;
+	}
+	if (typeof value === "string") {
+		return `${key}: ${yamlStr(value)}`;
+	}
+	return `${key}: ${value}`;
+}
+
 function lines(...parts: (string | undefined | false)[]): string {
 	return parts.filter(Boolean).join("\n");
 }
 
-function paginationHeader(
-	totalCount: number,
-	nextPage: number | null,
-	prevPage: number | null,
-): string {
-	const parts = [`${totalCount}件`];
-	if (prevPage !== null || nextPage !== null) {
-		const current = nextPage !== null ? nextPage - 1 : prevPage !== null ? prevPage + 1 : 1;
-		parts.push(`ページ${current}`);
+function indent(text: string, level = 1): string {
+	const prefix = "  ".repeat(level);
+	return text
+		.split("\n")
+		.map((line) => `${prefix}${line}`)
+		.join("\n");
+}
+
+function listItem(text: string): string {
+	const itemLines = text.split("\n");
+	if (itemLines.length === 1) {
+		return `  - ${itemLines[0]}`;
 	}
-	return parts.join(" | ");
+	return `  - ${itemLines[0]}\n${itemLines
+		.slice(1)
+		.map((l) => `    ${l}`)
+		.join("\n")}`;
 }
 
 function formatWork(w: Work): string {
 	return lines(
-		`## ${w.title} (ID: ${w.id})`,
-		w.media_text && `- メディア: ${w.media_text}`,
-		w.season_name_text && `- シーズン: ${w.season_name_text}`,
-		`- エピソード数: ${w.episodes_count} / 視聴者数: ${w.watchers_count} / レビュー数: ${w.reviews_count}`,
-		w.official_site_url && `- 公式サイト: ${w.official_site_url}`,
-		w.wikipedia_url && `- Wikipedia: ${w.wikipedia_url}`,
+		field("id", w.id),
+		field("title", w.title),
+		field("media", w.media_text),
+		field("season", w.season_name_text),
+		field("episodes_count", w.episodes_count),
+		field("watchers_count", w.watchers_count),
+		field("reviews_count", w.reviews_count),
+		field("official_site_url", w.official_site_url),
+		field("wikipedia_url", w.wikipedia_url),
 	);
 }
 
 function formatEpisode(e: Episode): string {
-	const title = e.title ? `「${e.title}」` : "";
-	const num = e.number_text || "";
 	return lines(
-		`## ${num}${title} (ID: ${e.id})`,
-		`- 記録数: ${e.records_count}`,
+		field("id", e.id),
+		field("number", e.number_text),
+		field("title", e.title),
+		field("records_count", e.records_count),
 	);
 }
 
 function formatRecord(r: Record): string {
-	const epText = r.episode.number_text || `EP${r.episode.id}`;
 	return lines(
-		`## ${r.user.name} - ${r.work.title} ${epText} (ID: ${r.id})`,
-		r.rating_state && `- 評価: ${r.rating_state}`,
-		r.comment && `- コメント: ${r.comment}`,
-		`- いいね: ${r.likes_count} / 投稿日: ${r.created_at.split("T")[0]}`,
+		field("id", r.id),
+		field("user", r.user.name),
+		field("work", r.work.title),
+		field("episode", r.episode.number_text || `EP${r.episode.id}`),
+		field("rating", r.rating_state),
+		field("comment", r.comment),
+		field("likes_count", r.likes_count),
+		field("created_at", r.created_at.split("T")[0]),
 	);
 }
 
 function formatReview(r: Review): string {
-	const ratings = [
-		r.rating_animation_state && `映像 ${r.rating_animation_state}`,
-		r.rating_music_state && `音楽 ${r.rating_music_state}`,
-		r.rating_story_state && `ストーリー ${r.rating_story_state}`,
-		r.rating_character_state && `キャラ ${r.rating_character_state}`,
-		r.rating_overall_state && `総合 ${r.rating_overall_state}`,
-	].filter(Boolean);
+	const ratingEntries = lines(
+		field("animation", r.rating_animation_state),
+		field("music", r.rating_music_state),
+		field("story", r.rating_story_state),
+		field("character", r.rating_character_state),
+		field("overall", r.rating_overall_state),
+	);
 
 	return lines(
-		`## ${r.title || "(無題)"} - ${r.work.title} (ID: ${r.id})`,
-		`- 投稿者: ${r.user.name}`,
-		ratings.length > 0 && `- 評価: ${ratings.join(" / ")}`,
-		r.body && `- 本文: ${r.body}`,
-		`- いいね: ${r.likes_count} / 投稿日: ${r.created_at.split("T")[0]}`,
+		field("id", r.id),
+		field("title", r.title || "(無題)"),
+		field("work", r.work.title),
+		field("user", r.user.name),
+		ratingEntries && `ratings:\n${indent(ratingEntries)}`,
+		field("body", r.body),
+		field("likes_count", r.likes_count),
+		field("created_at", r.created_at.split("T")[0]),
 	);
 }
 
 function formatUser(u: User): string {
 	return lines(
-		`# ${u.name} (@${u.username})`,
-		`- 記録数: ${u.records_count}`,
-		`- フォロー: ${u.followings_count} / フォロワー: ${u.followers_count}`,
-		`- 視聴ステータス: 見たい ${u.wanna_watch_count} / 見てる ${u.watching_count} / 見た ${u.watched_count} / 一時中断 ${u.on_hold_count} / 視聴中止 ${u.stop_watching_count}`,
-		u.url && `- URL: ${u.url}`,
+		field("id", u.id),
+		field("name", u.name),
+		field("username", u.username),
+		field("records_count", u.records_count),
+		field("followings_count", u.followings_count),
+		field("followers_count", u.followers_count),
+		`status:\n${indent(
+			lines(
+				field("wanna_watch", u.wanna_watch_count),
+				field("watching", u.watching_count),
+				field("watched", u.watched_count),
+				field("on_hold", u.on_hold_count),
+				field("stop_watching", u.stop_watching_count),
+			),
+		)}`,
+		field("url", u.url),
 	);
 }
 
 function formatActivity(a: Activity): string {
-	const parts = [
-		`## ${a.user.name} - ${a.action} (ID: ${a.id})`,
-		a.work && `- 作品: ${a.work.title}`,
-		`- 日時: ${a.created_at.split("T")[0]}`,
+	const parts: (string | false)[] = [
+		field("id", a.id),
+		field("user", a.user.name),
+		field("action", a.action),
+		a.work ? field("work", a.work.title) : false,
+		field("created_at", a.created_at.split("T")[0]),
 	];
 
 	if (a.record) {
-		a.record.rating_state && parts.push(`- 評価: ${a.record.rating_state}`);
-		a.record.comment && parts.push(`- コメント: ${a.record.comment}`);
+		parts.push(field("rating", a.record.rating_state));
+		parts.push(field("comment", a.record.comment));
 	}
 	if (a.review) {
-		a.review.body && parts.push(`- レビュー: ${a.review.body}`);
+		parts.push(field("review_body", a.review.body));
 	}
 	if (a.status) {
-		parts.push(`- ステータス: ${a.status.kind}`);
+		parts.push(field("status", a.status.kind));
 	}
 
-	return parts.filter(Boolean).join("\n");
+	return lines(...parts);
 }
 
 function formatProgram(p: Program): string {
 	const epText = p.episode.number_text || "";
 	const epTitle = p.episode.title ? `「${p.episode.title}」` : "";
+
 	return lines(
-		`## ${p.work.title} - ${epText}${epTitle} (ID: ${p.id})`,
-		`- チャンネル: ${p.channel.name}`,
-		`- 放送開始: ${p.started_at}`,
-		`- 再放送: ${p.is_rebroadcast ? "はい" : "いいえ"}`,
+		field("id", p.id),
+		field("work", p.work.title),
+		field("episode", `${epText}${epTitle}`),
+		field("channel", p.channel.name),
+		field("started_at", p.started_at),
+		field("is_rebroadcast", p.is_rebroadcast),
 	);
 }
 
 function formatCast(c: Cast): string {
-	return `## ${c.character.name} / ${c.name} (ID: ${c.id})`;
+	return lines(
+		field("id", c.id),
+		field("character", c.character.name),
+		field("name", c.name),
+	);
 }
 
 function formatStaff(s: Staff): string {
 	const name = s.name || s.organization?.name || "";
 	const role = s.role_text || s.role_other || "";
-	return `## ${name} - ${role} (ID: ${s.id})`;
+	return lines(
+		field("id", s.id),
+		field("name", name),
+		field("role", role),
+	);
 }
 
 function formatPaginated<T>(
@@ -133,12 +196,28 @@ function formatPaginated<T>(
 	key: keyof PaginatedResponse<T>,
 	formatter: (item: T) => string,
 ): string {
-	const header = paginationHeader(result.total_count, result.next_page, result.prev_page);
 	const items = result[key] as T[] | undefined;
+
+	const page =
+		result.next_page !== null
+			? result.next_page - 1
+			: result.prev_page !== null
+				? result.prev_page + 1
+				: null;
+
+	const header = lines(
+		`total_count: ${result.total_count}`,
+		page !== null && `page: ${page}`,
+	);
+
 	if (!items || items.length === 0) {
-		return `${header}\n\n(結果なし)`;
+		return `${header}\nitems: []`;
 	}
-	return `${header}\n\n${items.map(formatter).join("\n\n")}`;
+
+	const formattedItems = items
+		.map((item) => listItem(formatter(item)))
+		.join("\n");
+	return `${header}\nitems:\n${formattedItems}`;
 }
 
 export function formatWorks(result: PaginatedResponse<Work>): string {
@@ -157,7 +236,9 @@ export function formatReviews(result: PaginatedResponse<Review>): string {
 	return formatPaginated(result, "reviews", formatReview);
 }
 
-export function formatActivities(result: PaginatedResponse<Activity>): string {
+export function formatActivities(
+	result: PaginatedResponse<Activity>,
+): string {
 	return formatPaginated(result, "activities", formatActivity);
 }
 
